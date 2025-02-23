@@ -9,6 +9,7 @@ package frc.robot.subsystems;
 
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -20,7 +21,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   SparkMax elevatorMotor = new SparkMax(ElevatorConstants.kElevatorPort, MotorType.kBrushless);
   SparkMaxConfig config = new SparkMaxConfig();
   RelativeEncoder elevatorEncoder = elevatorMotor.getEncoder(); //42
-  
+  SparkClosedLoopController m_pidController = elevatorMotor.getClosedLoopController();
 
 
   /** Creates a new ElevatorSubsystem. */
@@ -65,14 +66,28 @@ public class ElevatorSubsystem extends SubsystemBase {
 // }
   }
 
- /* public void moveToPosition(double distance,String direction){
-    elevatorMotor.set(0.5);
-    if(elevatorEncoder.getPosition() >= distance){
-      elevatorMotor.stopMotor();
-    }
-    
 
-  } */
+  public void setPosition(double targetPosition) {
+      m_pidController.setReference(targetPosition, SparkMax.ControlType.kPosition);
+  }
+
+  
+  public void moveToPosition(double position) {
+    double kP = 0.1; // Proportional constant, adjust as needed
+    double tolerance = 0.05; // Allowable error margin
+
+    double error = position - elevatorEncoder.getPosition();
+    double speed = kP * error; // Calculate speed based on error
+
+    speed = Math.max(-0.5, Math.min(0.5, speed)); // Clamp speed between -0.5 and 0.5
+
+    if (Math.abs(error) > tolerance) {
+        elevatorMotor.set(speed); // Move the motor
+    } else {
+        elevatorMotor.stopMotor(); // Stop if within tolerance
+    }
+}
+
 //  run motor at desired speed
 //  if encoder get position is at whatever coral level
 //    stop motor

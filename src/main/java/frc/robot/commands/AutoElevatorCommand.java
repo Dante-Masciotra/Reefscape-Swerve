@@ -25,7 +25,17 @@ public class AutoElevatorCommand extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_elevatorSubsystem.resetEncoder();
+  
+
+    /**
+     * Why are we doing this
+     * loss of encoder position
+     * 
+     * 
+     * great if we want to say move 100 positions up or down
+     * Makes it impossible to have set positions to be remembered
+     */
+    // m_elevatorSubsystem.resetEncoder();
   //reset encoders
   }
 
@@ -33,6 +43,7 @@ public class AutoElevatorCommand extends Command {
   @Override
   public void execute() {
     m_elevatorSubsystem.setSpeed(0.1, m_direction);
+    m_elevatorSubsystem.setPosition(m_dist);
     //run motor in specified direction
   
   }
@@ -51,12 +62,12 @@ public class AutoElevatorCommand extends Command {
     
     //without tolerance
     if(m_direction.equals("up")){
-    if(m_elevatorSubsystem.getEncoderValue()>=m_dist)return true;
-    else return false;
+      if(m_elevatorSubsystem.getEncoderValue()>=m_dist)return true;
+        else return false;
     }
     else if(m_direction.equals("down")){
       if(m_elevatorSubsystem.getEncoderValue()<=m_dist)return true;
-    else return false;
+        else return false;
     }
     else{
       return true;
